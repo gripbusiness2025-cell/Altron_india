@@ -1,4 +1,9 @@
 import type { ImgHTMLAttributes } from 'react'
+import {
+  buildWidthSrcSet,
+  defaultSrcFromSet,
+  type ResponsiveWidths,
+} from '../lib/responsiveImage'
 
 type OptimizedPictureProps = {
   /** Path without extension, e.g. `/corporate/banner3-scaled` */
@@ -6,35 +11,55 @@ type OptimizedPictureProps = {
   /** Fallback format when WebP is missing in the browser (rare) */
   fallbackExt: 'jpg' | 'jpeg' | 'png'
   alt: string
+  /** Pre-generated `{base}-{w}w` assets from `npm run optimize-images` */
+  responsiveWidths?: ResponsiveWidths
+  sizes?: string
 } & Pick<
   ImgHTMLAttributes<HTMLImageElement>,
-  'className' | 'width' | 'height' | 'loading' | 'fetchPriority' | 'decoding' | 'sizes' | 'srcSet'
+  'className' | 'width' | 'height' | 'loading' | 'fetchPriority' | 'decoding'
 >
 
 /**
- * Serves `/path.webp` with original `/path.ext` fallback (same visual quality, smaller transfer).
+ * Serves responsive WebP (`srcset` + `sizes`) with original-format fallback.
  */
 export function OptimizedPicture({
   basePath,
   fallbackExt,
   alt,
+  responsiveWidths,
+  sizes,
   className,
   width,
   height,
   loading,
   fetchPriority,
   decoding = 'async',
-  sizes,
-  srcSet,
 }: OptimizedPictureProps) {
-  const fallbackSrc = `${basePath}.${fallbackExt}`
+  const legacyWebp = `${basePath}.webp`
+  const legacyFallback = `${basePath}.${fallbackExt}`
+
+  const webpSrcSet = responsiveWidths?.length
+    ? buildWidthSrcSet(basePath, 'webp', responsiveWidths)
+    : legacyWebp
+  const fallbackSrcSet = responsiveWidths?.length
+    ? buildWidthSrcSet(basePath, fallbackExt, responsiveWidths)
+    : undefined
+
+  const imgSrc = responsiveWidths?.length
+    ? defaultSrcFromSet(basePath, fallbackExt, responsiveWidths)
+    : legacyFallback
 
   return (
     <picture>
-      <source srcSet={`${basePath}.webp`} type="image/webp" sizes={sizes} />
+      <source
+        srcSet={webpSrcSet}
+        type="image/webp"
+        sizes={responsiveWidths?.length ? sizes : undefined}
+      />
       <img
-        src={fallbackSrc}
-        srcSet={srcSet}
+        src={imgSrc}
+        srcSet={fallbackSrcSet}
+        sizes={responsiveWidths?.length ? sizes : undefined}
         alt={alt}
         className={className}
         width={width}
@@ -42,7 +67,6 @@ export function OptimizedPicture({
         loading={loading}
         fetchPriority={fetchPriority}
         decoding={decoding}
-        sizes={sizes}
       />
     </picture>
   )

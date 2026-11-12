@@ -1,4 +1,5 @@
 import { CorporateBanner } from '../components/CorporateBanner'
+import { GoogleReviewBadge } from '../components/GoogleReviewBadge'
 import { ESTEEMED_CLIENT_LOGOS, esteemedClientLogoUrl } from '../content/esteemedClientsLogos'
 
 const MAP_URL =
@@ -32,12 +33,7 @@ export function EsteemedClientsPage() {
 
         <section className="corporate-reviews" aria-label="Google reviews">
           <a href={MAP_URL} target="_blank" rel="noopener noreferrer">
-            <img
-              src="/corporate/google-review.webp"
-              alt="View ALTRON Google reviews"
-              className="corporate-review-image"
-              loading="lazy"
-            />
+            <GoogleReviewBadge />
           </a>
         </section>
       </article>

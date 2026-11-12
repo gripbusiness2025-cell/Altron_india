@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { productCategories } from '../content/productCategories'
 import { fetchCatalogHealth, fetchCategoryTree } from '../lib/catalogApi'
+import { shouldLoadRemoteCatalog } from '../lib/catalogConfig'
 import type { ProductLink } from '../content/productCategories'
 
 type CatalogContextValue = {
@@ -24,14 +25,13 @@ const ProductCatalogContext = createContext<CatalogContextValue>({
 
 export function ProductCatalogProvider({ children }: { children: ReactNode }) {
   const [tree, setTree] = useState<ProductLink[]>(productCategories)
-  const [loading, setLoading] = useState(() => import.meta.env.VITE_CATALOG_SOURCE === 'static' ? false : true)
+  const [loading, setLoading] = useState(() => shouldLoadRemoteCatalog())
   const [source, setSource] = useState<'mongodb' | 'static'>('static')
 
   useEffect(() => {
     let cancelled = false
 
-    const useMongo = import.meta.env.VITE_CATALOG_SOURCE !== 'static'
-    if (!useMongo) {
+    if (!shouldLoadRemoteCatalog()) {
       setLoading(false)
       return
     }

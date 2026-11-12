@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { OptimizedPicture } from './OptimizedPicture'
+import { SIZES, WIDTHS } from '../lib/responsiveImage'
 
 const slides = [
   { base: '/corporate/banner1-1-scaled', fallbackExt: 'png' as const },
@@ -14,16 +15,38 @@ const slides = [
 ] as const
 
 const INTERVAL_MS = 5000
-const LCP_PRELOAD = `${slides[0].base}.webp`
-
 type CorporateBannerProps = {
   ariaLabel?: string
 }
 
 export function CorporateBanner({ ariaLabel = 'Page highlights' }: CorporateBannerProps) {
   const [active, setActive] = useState(0)
+  const [loadedSlides, setLoadedSlides] = useState(() => new Set([0]))
 
-  const [loadedSlides, setLoadedSlides] = useState(() => new Set([0, 1]))
+  useEffect(() => {
+    let cancelled = false
+    const addNext = () => {
+      if (!cancelled) {
+        setLoadedSlides((prev) => {
+          const next = new Set(prev)
+          next.add(1)
+          return next
+        })
+      }
+    }
+    if (typeof requestIdleCallback !== 'undefined') {
+      const id = requestIdleCallback(addNext, { timeout: 3000 })
+      return () => {
+        cancelled = true
+        cancelIdleCallback(id)
+      }
+    }
+    const t = window.setTimeout(addNext, 2500)
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+    }
+  }, [])
 
   useEffect(() => {
     setLoadedSlides((prev) => {
@@ -41,50 +64,47 @@ export function CorporateBanner({ ariaLabel = 'Page highlights' }: CorporateBann
     return () => window.clearInterval(id)
   }, [])
 
-  useEffect(() => {
-    const existing = document.querySelector(`link[data-preload-banner="1"]`)
-    if (existing) return
-    const link = document.createElement('link')
-    link.rel = 'preload'
-    link.as = 'image'
-    link.href = LCP_PRELOAD
-    link.type = 'image/webp'
-    link.setAttribute('data-preload-banner', '1')
-    document.head.appendChild(link)
-    return () => {
-      link.remove()
-    }
-  }, [])
-
   return (
-    <section className="corporate-banner" aria-label={ariaLabel}>
-      <div className="corporate-banner-track">
+    <section className="corporate-banner" aria-label={ariaLabel} aria-roledescription="carousel">
+      <div className="corporate-banner-track" aria-live="off">
         {slides.map((slide, index) => {
           if (!loadedSlides.has(index)) return null
+          const isActive = index === active
+          const isFirstHero = index === 0 && active === 0
           return (
-            <OptimizedPicture
+            <div
               key={slide.base}
-              basePath={slide.base}
-              fallbackExt={slide.fallbackExt}
-              alt=""
-              className={index === active ? 'corporate-banner-slide is-active' : 'corporate-banner-slide'}
-              width={1200}
-              height={475}
-              decoding={index === 0 ? 'sync' : 'async'}
-              loading={index === active ? 'eager' : 'lazy'}
-              fetchPriority={index === active && active === 0 ? 'high' : undefined}
-            />
+              id={`banner-slide-${index}`}
+              role="tabpanel"
+              aria-hidden={!isActive}
+              className={isActive ? 'corporate-banner-slide is-active' : 'corporate-banner-slide'}
+            >
+              <OptimizedPicture
+                basePath={slide.base}
+                fallbackExt={slide.fallbackExt}
+                alt={isActive && index === 0 ? 'ALTRON security solutions highlight' : ''}
+                responsiveWidths={WIDTHS.banner}
+                sizes={SIZES.banner}
+                width={1200}
+                height={475}
+                decoding={isFirstHero ? 'sync' : 'async'}
+                loading={isFirstHero ? 'eager' : 'lazy'}
+                fetchPriority={isFirstHero ? 'high' : undefined}
+              />
+            </div>
           )
         })}
       </div>
-      <div className="corporate-banner-dots" role="tablist" aria-label="Banner slides">
+      <div className="corporate-banner-dots" role="tablist" aria-label="Choose banner slide">
         {slides.map((slide, index) => (
           <button
             key={slide.base}
             type="button"
             role="tab"
             aria-selected={index === active}
-            aria-label={`Slide ${index + 1}`}
+            aria-controls={`banner-slide-${index}`}
+            id={`banner-tab-${index}`}
+            aria-label={`Show slide ${index + 1} of ${slides.length}`}
             className={index === active ? 'corporate-banner-dot is-active' : 'corporate-banner-dot'}
             onClick={() => setActive(index)}
           />

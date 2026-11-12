@@ -1,5 +1,7 @@
 import { CorporateBanner } from '../components/CorporateBanner'
 import { OptimizedPicture } from '../components/OptimizedPicture'
+import { GoogleReviewBadge } from '../components/GoogleReviewBadge'
+import { SIZES, WIDTHS } from '../lib/responsiveImage'
 
 const credentials = [
   'ALTRON (An ISO Certified Company)',
@@ -111,6 +113,8 @@ export function CorporatePage() {
               fallbackExt="jpg"
               alt="ALTRON security solutions"
               className="corporate-reasons-image"
+              responsiveWidths={WIDTHS.homeFeature}
+              sizes={SIZES.homeFeature}
               width={960}
               height={480}
               loading="lazy"
@@ -132,12 +136,7 @@ export function CorporatePage() {
 
         <section className="corporate-reviews" aria-label="Google reviews">
           <a href={MAP_URL} target="_blank" rel="noopener noreferrer">
-            <img
-              src="/corporate/google-review.webp"
-              alt="View ALTRON Google reviews"
-              className="corporate-review-image"
-              loading="lazy"
-            />
+            <GoogleReviewBadge />
           </a>
         </section>
       </article>

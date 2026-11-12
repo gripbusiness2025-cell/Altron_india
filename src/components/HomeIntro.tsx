@@ -1,4 +1,5 @@
 import { OptimizedPicture } from './OptimizedPicture'
+import { SIZES, WIDTHS } from '../lib/responsiveImage'
 
 const credentials = [
   'ALTRON (An ISO Certified Company)',
@@ -36,10 +37,11 @@ export function HomeIntro() {
               basePath="/home/ola-ads"
               fallbackExt="jpg"
               alt="ALTRON project collage including Ola Electric Bike Factory at Pochampalli SIPCOT"
+              responsiveWidths={WIDTHS.homeFeature}
+              sizes={SIZES.homeFeature}
               width={1024}
               height={714}
-              loading="eager"
-              fetchPriority="high"
+              loading="lazy"
               decoding="async"
             />
           </div>

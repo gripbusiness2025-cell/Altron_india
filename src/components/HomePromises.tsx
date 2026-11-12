@@ -1,4 +1,5 @@
 import { OptimizedPicture } from './OptimizedPicture'
+import { SIZES, WIDTHS } from '../lib/responsiveImage'
 
 const promises = [
   {
@@ -41,6 +42,8 @@ export function HomePromises() {
               basePath="/home/altron-home1"
               fallbackExt="jpg"
               alt="ALTRON Security Engineering team at corporate office"
+              responsiveWidths={WIDTHS.homeFeature}
+              sizes={SIZES.homeFeature}
               loading="lazy"
               decoding="async"
               width={960}

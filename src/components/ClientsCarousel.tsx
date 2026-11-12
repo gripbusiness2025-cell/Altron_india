@@ -1,3 +1,5 @@
+import { ClientLogoImage } from './ClientLogoImage'
+
 const clientFiles = [
   '1-2',
   '2-1',
@@ -44,15 +46,7 @@ export function ClientsCarousel() {
       <div className="clients-marquee" aria-hidden="false">
         <div className="clients-track">
           {track.map((name, index) => (
-            <img
-              key={`${name}-${index}`}
-              src={`/home/clients/${name}.jpg`}
-              alt=""
-              width={200}
-              height={182}
-              loading="lazy"
-              decoding="async"
-            />
+            <ClientLogoImage key={`${name}-${index}`} name={name} />
           ))}
         </div>
       </div>
