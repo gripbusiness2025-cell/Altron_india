@@ -19,7 +19,10 @@ catalogRouter.get('/tree', async (_req, res, next) => {
 
 catalogRouter.get('/resolve/*', async (req, res, next) => {
   try {
-    const segments = (req.params[0] || '').split('/').filter(Boolean)
+    const wild = req.params['']
+    const segments = Array.isArray(wild)
+      ? wild.filter(Boolean)
+      : (typeof wild === 'string' ? wild : '').split('/').filter(Boolean)
     const rows = await Category.find({ published: true }).lean()
     const tree = buildCategoryTree(rows)
     const resolved = resolveCategoryPath(tree, segments)
